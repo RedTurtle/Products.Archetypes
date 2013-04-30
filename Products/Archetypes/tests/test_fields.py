@@ -40,7 +40,7 @@ from Products.Archetypes.tests.atsitetestcase import portal_name
 from Products.Archetypes.tests.utils import mkDummyInContext
 from Products.Archetypes.tests.utils import PACKAGE_HOME
 
-from Products.Archetypes.atapi import Schema, DisplayList, BaseContentMixin, TextField
+from Products.Archetypes.atapi import Schema, DisplayList, IntDisplayList, BaseContentMixin, TextField
 from Products.Archetypes.interfaces import IFieldDefaultProvider
 from Products.Archetypes.interfaces.vocabulary import IVocabulary
 from Products.Archetypes import Field as at_field
@@ -160,6 +160,15 @@ class DummyVocabulary(object):
         return SimpleVocabulary.fromItems([("title1", "value1"), ("t2", "v2")])
 
 DummyVocabFactory = DummyVocabulary()
+
+
+class DummyIntVocabulary(object):
+    implements(IVocabularyFactory)
+
+    def __call__(self, context):
+        return SimpleVocabulary.fromItems([("title1", 1), ("t2", 2)])
+
+DummyIntVocabFactory = DummyIntVocabulary()
 
 
 class FakeRequest:
@@ -426,6 +435,25 @@ class ProcessingTest(ATSiteTestCase):
         getSiteManager().registerUtility(component=DummyVocabFactory, name='archetypes.tests.dummyvocab')
         self.assertEqual(field.Vocabulary(dummy), expected)
         getSiteManager().unregisterUtility(component=DummyVocabFactory, name='archetypes.tests.dummyvocab')
+
+    def test_factory_vocabulary_int(self):
+        dummy = self.makeDummy()
+        request = FakeRequest()
+        field = dummy.Schema().fields()[0]
+
+        # Default
+        self.assertEqual(field.Vocabulary(dummy), IntDisplayList())
+
+        expected = IntDisplayList([(1, 'title1'), (2, 't2')])
+
+        # # Vocabulary factory
+        field.vocabulary = ()
+        field.vocabulary_factory = 'archetypes.tests.dummyintvocab'
+        getSiteManager().registerUtility(component=DummyIntVocabFactory, name='archetypes.tests.dummyintvocab')
+        import pdb;pdb.set_trace()
+        self.assertEqual(field.Vocabulary(dummy), expected)
+        getSiteManager().unregisterUtility(component=DummyIntVocabFactory, name='archetypes.tests.dummyintvocab')
+
 
     def test_allowable_content_types_ok(self):
         dummy = self.makeDummy()
