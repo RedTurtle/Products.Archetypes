@@ -78,6 +78,10 @@ Changelog
   (setId calls manage_beforeDelete, 'onDelete' event, ...)
   [gbastien]
 
+- ``Vocabulary`` method was not working with ``vocabulary_factory``
+  and int values (IntDisplayList is required)
+  [keul]
+
 1.8.7 (2013-04-06)
 ------------------
 
